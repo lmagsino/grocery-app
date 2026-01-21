@@ -23,9 +23,16 @@ interface GroceryContextType {
   // Modal state
   isAddModalVisible: boolean;
   editingItem: GroceryItem | null;
+  scannedProduct: { name: string; barcode: string } | null;
   openAddModal: () => void;
   openEditModal: (item: GroceryItem) => void;
+  openAddModalWithScan: (name: string, barcode: string) => void;
   closeModal: () => void;
+
+  // Scanner state
+  isScannerVisible: boolean;
+  openScanner: () => void;
+  closeScanner: () => void;
 }
 
 const GroceryContext = createContext<GroceryContextType | undefined>(undefined);
@@ -40,6 +47,10 @@ export function GroceryProvider({ children }: { children: React.ReactNode }) {
   // Modal state
   const [isAddModalVisible, setIsAddModalVisible] = useState(false);
   const [editingItem, setEditingItem] = useState<GroceryItem | null>(null);
+  const [scannedProduct, setScannedProduct] = useState<{ name: string; barcode: string } | null>(null);
+
+  // Scanner state
+  const [isScannerVisible, setIsScannerVisible] = useState(false);
 
   // Computed values
   const itemCount = currentItems.length;
@@ -59,6 +70,7 @@ export function GroceryProvider({ children }: { children: React.ReactNode }) {
     };
     setCurrentItems(prev => [...prev, newItem]);
     setIsAddModalVisible(false);
+    setScannedProduct(null);
   }, []);
 
   const updateItem = useCallback((id: string, name: string, price: number) => {
@@ -99,17 +111,36 @@ export function GroceryProvider({ children }: { children: React.ReactNode }) {
   // Modal actions
   const openAddModal = useCallback(() => {
     setEditingItem(null);
+    setScannedProduct(null);
     setIsAddModalVisible(true);
   }, []);
 
   const openEditModal = useCallback((item: GroceryItem) => {
     setEditingItem(item);
+    setScannedProduct(null);
+    setIsAddModalVisible(true);
+  }, []);
+
+  const openAddModalWithScan = useCallback((name: string, barcode: string) => {
+    setEditingItem(null);
+    setScannedProduct({ name, barcode });
+    setIsScannerVisible(false);
     setIsAddModalVisible(true);
   }, []);
 
   const closeModal = useCallback(() => {
     setEditingItem(null);
+    setScannedProduct(null);
     setIsAddModalVisible(false);
+  }, []);
+
+  // Scanner actions
+  const openScanner = useCallback(() => {
+    setIsScannerVisible(true);
+  }, []);
+
+  const closeScanner = useCallback(() => {
+    setIsScannerVisible(false);
   }, []);
 
   const value: GroceryContextType = {
@@ -124,9 +155,14 @@ export function GroceryProvider({ children }: { children: React.ReactNode }) {
     saveTrip,
     isAddModalVisible,
     editingItem,
+    scannedProduct,
     openAddModal,
     openEditModal,
+    openAddModalWithScan,
     closeModal,
+    isScannerVisible,
+    openScanner,
+    closeScanner,
   };
 
   return (

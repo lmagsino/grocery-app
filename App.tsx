@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, View, ScrollView, ActivityIndicator, Alert } from 'react-native';
+import { StyleSheet, View, ScrollView, ActivityIndicator, Alert, Modal } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import * as SplashScreen from 'expo-splash-screen';
 import { useFonts } from './src/hooks/useFonts';
@@ -13,6 +13,7 @@ import {
   ActionButtons,
   AddItemModal,
 } from './src/components';
+import { ScannerScreen } from './src/screens/ScannerScreen';
 import { colors, spacing, layout } from './src/theme';
 
 // Keep splash screen visible while fonts load
@@ -27,12 +28,11 @@ function HomeScreen() {
     deleteItem,
     openEditModal,
     saveTrip,
+    isScannerVisible,
+    openScanner,
+    closeScanner,
+    openAddModalWithScan,
   } = useGrocery();
-
-  const handleScan = () => {
-    // TODO: Implement in Phase 6
-    Alert.alert('Coming Soon', 'Barcode scanning will be available soon!');
-  };
 
   const handleDone = () => {
     Alert.alert(
@@ -48,6 +48,15 @@ function HomeScreen() {
   const handleHistory = () => {
     // TODO: Implement in Phase 8
     Alert.alert('Coming Soon', 'Shopping history will be available soon!');
+  };
+
+  const handleProductScanned = (name: string, barcode: string) => {
+    openAddModalWithScan(name, barcode);
+  };
+
+  const handleManualEntry = () => {
+    closeScanner();
+    openAddModal();
   };
 
   return (
@@ -82,13 +91,26 @@ function HomeScreen() {
       {/* Action Buttons */}
       <ActionButtons
         onAddItem={openAddModal}
-        onScan={handleScan}
+        onScan={openScanner}
         onDone={handleDone}
         hasItems={currentItems.length > 0}
       />
 
       {/* Add/Edit Modal */}
       <AddItemModal />
+
+      {/* Scanner Modal */}
+      <Modal
+        visible={isScannerVisible}
+        animationType="slide"
+        presentationStyle="fullScreen"
+      >
+        <ScannerScreen
+          onClose={closeScanner}
+          onProductScanned={handleProductScanned}
+          onManualEntry={handleManualEntry}
+        />
+      </Modal>
     </View>
   );
 }

@@ -20,25 +20,33 @@ import { parsePeso } from '../utils/formatCurrency';
  * Features peso-formatted price input and form validation
  */
 export function AddItemModal() {
-  const { isAddModalVisible, editingItem, closeModal, addItem, updateItem } = useGrocery();
+  const { isAddModalVisible, editingItem, scannedProduct, closeModal, addItem, updateItem } = useGrocery();
 
   const [name, setName] = useState('');
   const [priceInput, setPriceInput] = useState('');
+  const [barcode, setBarcode] = useState<string | undefined>(undefined);
   const [error, setError] = useState('');
 
   const isEditing = editingItem !== null;
+  const isFromScan = scannedProduct !== null;
 
-  // Populate form when editing
+  // Populate form when editing or from scan
   useEffect(() => {
     if (editingItem) {
       setName(editingItem.name === 'Item' ? '' : editingItem.name);
       setPriceInput(editingItem.price.toString());
+      setBarcode(editingItem.barcode);
+    } else if (scannedProduct) {
+      setName(scannedProduct.name);
+      setPriceInput('');
+      setBarcode(scannedProduct.barcode);
     } else {
       setName('');
       setPriceInput('');
+      setBarcode(undefined);
     }
     setError('');
-  }, [editingItem, isAddModalVisible]);
+  }, [editingItem, scannedProduct, isAddModalVisible]);
 
   const handlePriceChange = (text: string) => {
     // Only allow numbers and one decimal point
@@ -67,15 +75,22 @@ export function AddItemModal() {
     if (isEditing && editingItem) {
       updateItem(editingItem.id, name, price);
     } else {
-      addItem(name, price);
+      addItem(name, price, barcode);
     }
   };
 
   const handleClose = () => {
     setName('');
     setPriceInput('');
+    setBarcode(undefined);
     setError('');
     closeModal();
+  };
+
+  const getTitle = () => {
+    if (isEditing) return 'Edit Item';
+    if (isFromScan) return 'Scanned Item';
+    return 'Add Item';
   };
 
   return (
@@ -94,9 +109,7 @@ export function AddItemModal() {
             <View style={styles.container}>
               {/* Header */}
               <View style={styles.header}>
-                <Text style={styles.title}>
-                  {isEditing ? 'Edit Item' : 'Add Item'}
-                </Text>
+                <Text style={styles.title}>{getTitle()}</Text>
                 <TouchableOpacity
                   onPress={handleClose}
                   style={styles.closeButton}
