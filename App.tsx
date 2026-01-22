@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, View, ScrollView, ActivityIndicator, Alert, Modal } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
@@ -14,6 +14,9 @@ import {
   AddItemModal,
 } from './src/components';
 import { ScannerScreen } from './src/screens/ScannerScreen';
+import { HistoryScreen } from './src/screens/HistoryScreen';
+import { TripDetailScreen } from './src/screens/TripDetailScreen';
+import { ShoppingTrip } from './src/types';
 import { colors, spacing, layout } from './src/theme';
 
 // Keep splash screen visible while fonts load
@@ -25,6 +28,7 @@ function HomeScreen() {
     currentItems,
     itemCount,
     total,
+    history,
     openAddModal,
     deleteItem,
     openEditModal,
@@ -34,6 +38,10 @@ function HomeScreen() {
     closeScanner,
     openAddModalWithScan,
   } = useGrocery();
+
+  // History navigation state
+  const [isHistoryVisible, setIsHistoryVisible] = useState(false);
+  const [selectedTrip, setSelectedTrip] = useState<ShoppingTrip | null>(null);
 
   // Show loading indicator while persisted data is being loaded
   if (isLoading) {
@@ -56,8 +64,19 @@ function HomeScreen() {
   };
 
   const handleHistory = () => {
-    // TODO: Implement in Phase 8
-    Alert.alert('Coming Soon', 'Shopping history will be available soon!');
+    setIsHistoryVisible(true);
+  };
+
+  const handleCloseHistory = () => {
+    setIsHistoryVisible(false);
+  };
+
+  const handleTripPress = (trip: ShoppingTrip) => {
+    setSelectedTrip(trip);
+  };
+
+  const handleCloseTripDetail = () => {
+    setSelectedTrip(null);
   };
 
   const handleProductScanned = (name: string, barcode: string) => {
@@ -120,6 +139,33 @@ function HomeScreen() {
           onProductScanned={handleProductScanned}
           onManualEntry={handleManualEntry}
         />
+      </Modal>
+
+      {/* History Modal */}
+      <Modal
+        visible={isHistoryVisible}
+        animationType="slide"
+        presentationStyle="fullScreen"
+      >
+        <HistoryScreen
+          trips={history}
+          onClose={handleCloseHistory}
+          onTripPress={handleTripPress}
+        />
+      </Modal>
+
+      {/* Trip Detail Modal */}
+      <Modal
+        visible={selectedTrip !== null}
+        animationType="slide"
+        presentationStyle="fullScreen"
+      >
+        {selectedTrip && (
+          <TripDetailScreen
+            trip={selectedTrip}
+            onClose={handleCloseTripDetail}
+          />
+        )}
       </Modal>
     </View>
   );
