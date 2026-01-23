@@ -50,11 +50,7 @@ export function TotalDisplay({ itemCount, total }: TotalDisplayProps) {
   return (
     <View style={styles.container}>
       {/* Dashed receipt line */}
-      <View style={styles.receiptLine}>
-        {Array.from({ length: 30 }).map((_, i) => (
-          <View key={i} style={styles.dash} />
-        ))}
-      </View>
+      <View style={styles.receiptLine} />
 
       <View style={styles.content}>
         <View style={styles.itemCountSection}>
@@ -87,17 +83,11 @@ const styles = StyleSheet.create({
   },
 
   receiptLine: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+    height: 1,
     marginBottom: spacing.lg,
-    overflow: 'hidden',
-  },
-  dash: {
-    width: 8,
-    height: 2,
-    backgroundColor: colors.receiptDash,
-    marginHorizontal: 4,
-    borderRadius: 1,
+    borderStyle: 'dashed',
+    borderWidth: 1,
+    borderColor: colors.receiptDash,
   },
 
   content: {
